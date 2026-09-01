@@ -11,10 +11,10 @@ const v = process.version;
 console.log(`[Node] ${v}`);
 if (parseInt(v.replace('v','').split('.')[0]) < 20) { console.log('       ⚠️ 需 Node ≥ 20'); ok = false; }
 try {
-  const w = spawnSync('tripo', ['whoami','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding: 'utf8' });
+  const w = spawnSync('tripo', ['whoami','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding: 'utf8', shell: process.platform === 'win32' });
   if (w.status === 0) {
     const who = JSON.parse(w.stdout);
-    const bj = spawnSync('tripo', ['balance','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding:'utf8' }).stdout || '{}';
+    const bj = spawnSync('tripo', ['balance','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding:'utf8', shell: process.platform === 'win32' }).stdout || '{}';
     const b = JSON.parse(bj);
     console.log(`[Tripo] region=${who.region}  balance=${b.balance}`);
     if ((b.balance||0) <= 0) console.log('       ⚠️ 余额 0，需充值/领积分');

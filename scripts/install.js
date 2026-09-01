@@ -51,9 +51,9 @@ function findGodot(){
 }
 function findGodotExe(dir){
   if (!dir || !fs.existsSync(dir)) return null;
-  const exes = lsDirs(dir).length ? [] : []; // directories only for godot folders normally
   try {
-    const files = fs.readdirSync(dir).filter(f => /^Godot.*\.exe$|^Godot.*$/i.test(f));
+    const files = fs.readdirSync(dir).filter(f =>
+      /^Godot.*\.exe$/i.test(f) && fs.statSync(path.join(dir, f)).isFile());
     const gui = files.filter(f => !/console/i.test(f));
     const pick = gui[0] || files[0];
     return pick ? path.join(dir, pick) : null;
@@ -111,7 +111,7 @@ function removeSection(text, name){
   let tripo_ok = false;
   if (!SKIPT) {
     if (!which('tripo')) { log('安装 tripo-cli ...'); execSync('npm install -g tripo-cli', { stdio: 'inherit', env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY } }); }
-    const w = spawnSync('tripo', ['whoami','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding:'utf8' });
+    const w = spawnSync('tripo', ['whoami','--json'], { env: { ...process.env, HTTP_PROXY: PROXY, HTTPS_PROXY: PROXY }, encoding:'utf8', shell: process.platform === 'win32' });
     tripo_ok = w.status === 0;
     if (tripo_ok) log('Tripo 已登录 ✅'); else log('Tripo 未登录 → 运行:  tripo login --region ov|cn  （浏览器授权）');
     out.tripo_ok = tripo_ok; fs.writeFileSync(configPath, JSON.stringify(out, null, 2));

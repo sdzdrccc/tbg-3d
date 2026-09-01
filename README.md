@@ -160,3 +160,8 @@ node "$env:USERPROFILE\.codex\skills\tbg-3d\scripts\verify.js"
 ```
 
 > 提示：`install.js` 自带有交互式路径询问；若无 GUI 可用 `--non-interactive`，或用 `--project-dir <路径>` 指定项目。
+
+### Windows 已知问题（已修复）
+
+1. **Godot exe 误配为 `GodotSharp` 目录**：`findGodotExe` 原正则 `/^Godot.*\.exe$|^Godot.*$/i` 会匹配以 `Godot` 开头的**目录**（如 `GodotSharp`），导致 `godot_exe` / `GODOT_PATH` 指向目录而非 `.exe`，自动启动 Godot 时 `ENOENT`。已改为仅匹配 `Godot*.exe` 且 `statSync(...).isFile()`，并优先非 console 版本。
+2. **Node 在 Windows 无法直接 spawn npm 全局 `tripo`（`.cmd` 包装）**：`spawnSync('tripo', ...)` 报 `ENOENT`，被误判为“未登录”。已为 install.js / verify.js 的 tripo 调用加 `shell: process.platform === 'win32'`。
