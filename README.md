@@ -44,7 +44,7 @@ TBG-3D 是面向 AI 编码助手（Codex、Claude Code、Cursor、Windsurf 等�
 把两个 skill 放到助手的 skills 目录（Codex：`~/.codex/skills/`）：
 
 ```bash
-git clone https://github.com/<you>/tbg-3d
+git clone https://github.com/sdzdrccc/tbg-3d
 cp -R tbg-3d ~/.codex/skills/tbg-3d
 
 ```
