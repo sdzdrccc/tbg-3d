@@ -61,6 +61,30 @@
 - [x] 资产包 LOD / preview.png 自动化已完成：新增 `pipeline/refine/render-preview.py`（Blender 无头）。
   - `roof-xuanshan-single-a` 已精修：40608 → 15000 面、缩放归一为 6m 宽、轴心底部中心、生成 preview.png。
   - 全库 14 件资产均已生成 preview.png，`validate.js` 0 错误 0 警告。
-- [ ] tbg-3d 侧也接入 CI（至少 `node --check` 全部脚本）。
+- [x] tbg-3d 侧也接入 CI（`.github/workflows/ci.yml`，`node --check` 全部脚本，共 7 个文件通过）。
 - [ ] 新风格套件（`kits/tang` 等）化：材质参数表、分类映射收进每个 kit，脚本按 kit 读取。
-- [ ] `verify.js` 增强：检测 `assets_repo` 可写、`inbox` 存在。
+- [x] `verify.js` 增强：检测 `assets_repo` 可写、`inbox` 存在（已加入 `[Assets]` 检查）。
+
+
+---
+
+## 四、轮次 2（slash command / CI / verify 增强）
+
+### 1. 排查到的问题
+
+- **`/tbg-set` 没有独立的斜杠命令**：技能 `tbg-3d` 的 `name: tbg-3d` 只注册了 `/tbg-3d`；`/tbg-set` 仅存在于 description 作为触发短语，从未被注册为可选项。用户输入 `/tbg` 时下拉框只有 `/tbg-3d`，看不到 `tbg-set`。
+  - 根因：Codex 以「技能目录名 / 前端 `name`」作为斜杠命令；自定义 prompt（`.codex/prompts`）走 `/prompts:name` 命名空间，不会出现裸 `/name`。
+- **tbg-3d 无 CI**：所有 `scripts/**`、`pipeline/scripts/**` 没有语法检查 / PR 校验，改坏脚本只能在本地发现。
+- **`verify.js` 不校验仓储端**：只查 Node / Tripo / Blender / Godot / project，未查 `assets_repo` 是否可达、可写，`inbox` 是否存在。
+
+### 2. 已实施的优化
+
+- **新增独立技能 `tbg-set`（`cmd/tbg-set/SKILL.md`）**，`name: tbg-set`：
+  - 作为「配置 / 更新环境」入口，运行时调用 `scripts/install.js` + `scripts/verify.js`。
+  - 已用 junction 装入 `~/.codex/skills/tbg-set` → `cmd/tbg-set`，与 `tbg-3d` 同仓库，随 git 版本化。
+  - 同步把 `tbg-3d` 的 description 里对 `/tbg-set` 的“认领”改为“路由到 /tbg-set”，避免一短语触发两技能。
+- **新增 CI `.github/workflows/ci.yml`**：push / PR 命中 `scripts/**`、`pipeline/scripts/**` 时对全部 `.js` 跑 `node --check`（共 7 个文件通过）。
+- **`verify.js` 增强**：新增 `[Assets]` 检查 —— 检测 `assets_repo` 是否配置 / 存在 / 可写，`inbox` 是否已存在（缺失时提示“首次打包将自动创建”，非硬失败）。
+
+> 提示：装好 `tbg-set` 技能后需重启 Codex 或新开会话，前端才会把 `/tbg-set` 加入斜杠菜单。
+

@@ -30,6 +30,18 @@ if (cfg.godot_dir && fs.existsSync(cfg.godot_dir)) {
 } else { console.log('[Godot] 未配置/未找到 — 运行 install.js'); ok = false; }
 if (cfg.project_dir && fs.existsSync(path.join(cfg.project_dir, 'project.godot'))) console.log(`[Project] ${cfg.project_dir}`);
 else { console.log('[Project] 未配置/project.godot 不存在'); ok = false; }
+if (cfg.assets_repo && fs.existsSync(cfg.assets_repo)) {
+  const inbox = path.join(cfg.assets_repo, 'inbox');
+  let repoWritable = false;
+  try { fs.accessSync(cfg.assets_repo, fs.constants.W_OK); repoWritable = true; } catch {}
+  console.log(`[Assets] repo: ${cfg.assets_repo}`);
+  console.log(`        inbox: ${fs.existsSync(inbox) ? '存在' : '缺失（首次打包将自动创建）'}   仓库可写: ${repoWritable ? '是' : '否'}`);
+  if (!repoWritable) { console.log('       ⚠️ assets_repo 不可写'); ok = false; }
+} else if (cfg.assets_repo) {
+  console.log('[Assets] assets_repo 路径不存在'); ok = false;
+} else {
+  console.log('[Assets] 未配置 assets_repo（缺少时打包需 --out）'); ok = false;
+}
 console.log('=== 结论 ===');
 console.log(ok ? '基本环境就绪：启动 Blender(addon)、打开 Godot、确认 tripo 余额即可使用。'
                : '仍有缺失，请运行 install.js 补齐。');

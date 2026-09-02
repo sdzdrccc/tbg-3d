@@ -1,6 +1,6 @@
 ---
 name: tbg-3d
-description: Use when the user types /tbg-set to configure or update the TBG-3D environment (pick Blender/Godot folders, install Tripo, configure blender-mcp/godot-mcp, auto-launch apps). Use when the user types /tbg-3d to generate a 3D asset via Tripo (text/image/multiview) or import an external model file (Hunyuan GLB/FBX), refine in Blender, pack an asset package into tbg-assets inbox, and optionally import into a Godot project. Also trigger on requests to create a building/gate/prop/tree/weapon with Tripo, or to first install TBG-3D. Covers low-poly game assets.
+description: Use when the user types /tbg-3d to generate a 3D asset via Tripo (text/image/multiview) or import an external model file (Hunyuan GLB/FBX), refine in Blender, pack an asset package into tbg-assets inbox, and optionally import into a Godot project. Also trigger on requests to create a building/gate/prop/tree/weapon with Tripo, or to first install TBG-3D. For environment setup/configuration (pick Blender/Godot folders, install Tripo, configure blender-mcp/godot-mcp, auto-launch apps) use the /tbg-set command. Covers low-poly game assets.
 ---
 
 # TBG-3D — 3D 资产生产线（Tripo/混元 → Blender 精修 → 资产包 → Godot）
