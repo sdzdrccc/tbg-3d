@@ -10,7 +10,7 @@
  *     --glb <模型路径> --id cn-ancient.roof.xuanshan-single-a \
  *     --name "悬山顶·单檐 A" --tier component --dims 8,3,6 --polycount 40600 \
  *     [--category components/roof] [--tags 悬山,单檐] [--materials roof-tile/qingwa] \
- *     [--generator hunyuan] [--mode text] [--prompt ...] [--credits 0] \
+ *     [--generator hunyuan] [--mode text] [--prompt ...] [--credits 0] [--preview <preview.png>] \
  *     [--collision box] [--out <覆盖投递目录>]
  *
  * 投递目录默认：<config.json 的 assets_repo>/inbox/<id 末段>/。
@@ -205,6 +205,11 @@ function packAsset(opts, outRoot, ctx) {
   };
   fs.writeFileSync(path.join(pkgDir, "source.json"), JSON.stringify(source, null, 2) + "\n");
 
+  // 可选 preview.png：入库后 validate.js 会校验该文件存在
+  if (opts.preview && fs.existsSync(opts.preview)) {
+    fs.copyFileSync(opts.preview, path.join(pkgDir, "preview.png"));
+  }
+
   return { pkgDir, warnings };
 }
 
@@ -245,6 +250,7 @@ if (require.main === module) {
         collision: args.collision,
         author: args.author,
         refinement: args.refinement,
+        preview: args.preview,
       },
       outRoot,
       ctx

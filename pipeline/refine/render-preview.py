@@ -112,6 +112,22 @@ def decimate(objs, target_faces):
         bpy.ops.object.modifier_apply(modifier=mod.name)
 
 
+def downscale_textures(max_texture):
+    """把内嵌贴图缩放到最大边 <= max_texture（游戏资产贴图 ≤1024）。"""
+    if not max_texture or max_texture <= 0:
+        return
+    for img in bpy.data.images:
+        if img.size[0] <= 0 or img.size[1] <= 0:
+            continue
+        if img.size[0] <= max_texture and img.size[1] <= max_texture:
+            continue
+        scale = max_texture / float(max(img.size[0], img.size[1]))
+        new_w = max(1, int(img.size[0] * scale))
+        new_h = max(1, int(img.size[1] * scale))
+        img.scale(new_w, new_h)
+        print(f"TEX_DOWNSCALE {img.name}: {img.size[0]}x{img.size[1]} -> {new_w}x{new_h}")
+
+
 def export_glb(path, objs):
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs:
@@ -178,6 +194,7 @@ def main():
 
     normalize_scale_and_origin(objs, cfg.get("target_width_m", 0))
     decimate(objs, cfg.get("target_faces", 0))
+    downscale_textures(cfg.get("max_texture", 1024))
 
     out_glb = cfg.get("output_glb") or cfg["input"]
     render_only = cfg.get("render_only", False)

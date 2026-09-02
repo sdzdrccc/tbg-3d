@@ -88,3 +88,23 @@
 
 > 提示：装好 `tbg-set` 技能后需重启 Codex 或新开会话，前端才会把 `/tbg-set` 加入斜杠菜单。
 
+
+---
+
+## 五、轮次 3（外部文件入库链路 + 贴图 / preview 打包）
+
+### 1. 排查到的问题
+
+- **资产包不含 preview.png**：`pack.js` 只写 `model.glb / asset.json / source.json`，而 `validate.js` 校验每件库内资产目录必须有 `preview.png`。新资产经 `intakePackage` 入库后必然缺预览 → 触发校验警告。
+- **`render-preview.py` 不压贴图**：若导入模型带 2K/4K 贴图，导出 GLB 会非常大；游戏资产贴图应 ≤1024。
+- （新资产）外部模型 `xieshan-roof.glb` 约 498k 面，未按库内标准精修。
+
+### 2. 已实施的优化
+
+- **`render-preview.py` 新增 `downscale_textures(max_texture)`**：把内嵌贴图缩放到最大边 ≤ `max_texture`（默认 1024），导出前调用（不足 1024 的自动跳过）。
+- **`pack.js` 支持 `--preview <preview.png>`**：把预览图一并放入资产包（可选；供 `validate.js` 校验）。
+- **处理外部模型** `xieshan-roof.glb` → 精修 `cn-ancient.roof.xieshan-single-a`（歇山顶·单檐 A）：
+  - 498156 → **15000 面**、缩放归一为 **6.0m 宽**、轴心底部中心；
+  - 贴图已校验 ≤1024（源已是 1024）、生成 300×300 `preview.png`；
+  - 已投递 `tbg-assets/inbox/xieshan-single-a`（schema 校验通过，含 preview.png）。
+
