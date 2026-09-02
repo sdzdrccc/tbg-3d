@@ -1,8 +1,12 @@
 # TBG-3D
 
-> **Tripo + Blender + Godot 3D 资产管线** · 一套让 AI 用自然语言把「生成 3D 模型 → Blender 精调 → 导入 Godot」跑通的 Skill 套件。
+> **3D 资产生产线** · 一套让 AI 用自然语言把「生成 3D 模型 → Blender 精修 → 打包资产包 → 导入 Godot」跑通的 Skill 套件。
 
-TBG-3D 是面向 AI 编码助手（Codex、Claude Code、Cursor、Windsurf 等）的 **Codex Skill**。装上后，你只要说一句"给出生城做个中式门楼"，助手就能自动调用 **Tripo** 生成低模 → 在 **Blender** 打开精调 → 导入 **Godot** 场景，产出可用的游戏资产。
+TBG-3D 是面向 AI 编码助手（Codex、Claude Code、Cursor、Windsurf 等）的 **Codex Skill**。装上后，你只要说一句"给出生城做个中式门楼"，助手就能自动调用 **Tripo** 生成低模（或接收混元等外部工具生成的模型文件）→ 在 **Blender** 精修 → 打包成标准**资产包**投递到 [tbg-assets](https://github.com/sdzdrccc/tbg-assets) 资产库，或直接导入 **Godot** 场景。
+
+> **生产/仓储分工（2026-09 重构）**：TBG-3D 是**生产端**（生成 → 分类 → 精修 → 压缩 → 打包），[tbg-assets](https://github.com/sdzdrccc/tbg-assets) 是**仓储端**（校验 → 入库 → 索引 → 展示）。两项目通过「资产包」（model.glb + asset.json + source.json）解耦，schema 权威在 tbg-assets。完整方案见 tbg-assets 的 `docs/RESTRUCTURE-PLAN.md`。
+>
+> `pipeline/` 目录：轴心规范（origin-rules）、材质映射表（material-map）、提示词模板、生成计划、打包脚本（pack.js）、Blender 精修脚本（refine/refine.py）、混元 FBX 缩放修正（fix-scale.js）等生产工具。
 
 ---
 

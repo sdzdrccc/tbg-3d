@@ -18,3 +18,4 @@ Thumbs.db
 # 本地生成产物
 tripo-out/
 tmp/
+.tmp-prims/
