@@ -15,6 +15,12 @@
  *
  * 投递目录默认：<config.json 的 assets_repo>/inbox/<id 末段>/。
  * 入库由 tbg-assets 仓储站扫描确认完成，本脚本只负责产出合规资产包。
+ *
+ * 优化（2026-09-02）：
+ *   - category 枚举、面数预算优先从 tbg-assets 的 schema / kit.json 派生，避免两次硬编码漂移；
+ *   - 若 config.assets_repo 可访问，则对生成的 asset.json 复用 tbg-assets 的
+ *     pipeline/scripts/lib/schema.js 做 schema 校验，不通过即拒发；
+ *   - 投递目录改为「同 id 覆盖、异 id 报错」，不再用 rm -rf 静默删除已有目录。
  */
 
 const fs = require("fs");
@@ -25,7 +31,7 @@ const TIERS = ["primitive", "component", "mass", "hero"];
 const COLLISIONS = ["box", "convex", "none"];
 const BUDGET = { primitive: 10000, component: 20000, mass: 50000, hero: 100000 };
 
-/** 与 asset.schema.json 对应的 category 白名单（schema 变更时需同步） */
+/** 与 asset.schema.json 对应的 category 白名单（schema 不可用时才用此回退） */
 const CATEGORIES = [
   "components/roof", "components/wall", "components/pillar", "components/base",
   "components/door-window", "components/railing", "components/bracket",
@@ -53,13 +59,69 @@ function parseArgs(argv) {
 }
 
 /**
+ * 依据 config.assets_repo 构建「契约上下文」：
+ *  - categories：优先取 asset.schema.json 的 category enum，否则用内置回退表；
+ *  - budgets：优先取 kits/<kit>/kit.json 的 budgets，否则用内置 BUDGET；
+ *  - validate：若 tbg-assets 存在 lib/schema.js 则返回其 validateAssetJson，否则 null。
+ * @param {object} config readConfig() 结果
+ * @param {string} kit 资产所属 kit id（用于读 kit.json 预算）
+ * @returns {{categories: string[], budgets: object, validate: function|null, schemaPath: string|null, notes: string[]}}
+ */
+function buildCtx(config, kit) {
+  const notes = [];
+  let categories = CATEGORIES;
+  let budgets = BUDGET;
+  let validate = null;
+  let schemaPath = null;
+  const repo = config.assets_repo;
+
+  if (repo) {
+    const repoRoot = path.resolve(repo);
+    const schemaFile = path.join(repoRoot, "pipeline", "schemas", "asset.schema.json");
+    if (fs.existsSync(schemaFile)) {
+      try {
+        const schema = JSON.parse(fs.readFileSync(schemaFile, "utf8"));
+        const catEnum = schema && schema.properties && schema.properties.category && schema.properties.category.enum;
+        if (Array.isArray(catEnum) && catEnum.length) {
+          categories = catEnum;
+          notes.push(`category 枚举来自 schema（${catEnum.length} 项）`);
+        }
+        schemaPath = schemaFile;
+      } catch (e) {
+        notes.push(`读取 schema 失败，使用内置 category 表：${e.message}`);
+      }
+    } else {
+      notes.push("未找到 tbg-assets schema，使用内置 category 表");
+    }
+
+    const kitFile = path.join(repoRoot, "kits", kit, "kit.json");
+    if (fs.existsSync(kitFile)) {
+      try {
+        const kb = JSON.parse(fs.readFileSync(kitFile, "utf8")).budgets;
+        if (kb && Object.keys(kb).length) { budgets = kb; notes.push(`面数预算来自 kits/${kit}/kit.json`); }
+      } catch (e) { notes.push(`读取 kit.json 预算失败，使用内置 BUDGET：${e.message}`); }
+    }
+
+    const schemaLib = path.join(repoRoot, "pipeline", "scripts", "lib", "schema.js");
+    if (fs.existsSync(schemaLib)) {
+      try { validate = require(schemaLib).validateAssetJson; notes.push("已启用 asset.schema.json 校验"); }
+      catch (e) { notes.push(`启用 schema 校验失败：${e.message}`); }
+    }
+  }
+
+  return { categories, budgets, validate, schemaPath, notes };
+}
+
+/**
  * 打包一件资产。可被其他脚本（如 gen-primitives.js）require 复用。
  * @param {object} opts 同 CLI 参数（glb/id/name/tier/dims/polycount 必填）
  * @param {string} outRoot 投递根目录（通常是 tbg-assets/inbox）
+ * @param {object} [ctx] buildCtx() 结果（可选，缺省时用内置默认）
  * @returns {{ pkgDir: string, warnings: string[] }}
  */
-function packAsset(opts, outRoot) {
+function packAsset(opts, outRoot, ctx) {
   const warnings = [];
+  const c = ctx || { categories: CATEGORIES, budgets: BUDGET, validate: null, notes: [] };
 
   for (const k of ["glb", "id", "name", "tier", "dims", "polycount", "category"]) {
     if (opts[k] === undefined || opts[k] === null || opts[k] === "") {
@@ -72,8 +134,8 @@ function packAsset(opts, outRoot) {
   }
   const [kit] = opts.id.split(".");
   if (!TIERS.includes(opts.tier)) throw new Error(`tier 必须是 ${TIERS.join("/")}`);
-  if (!CATEGORIES.includes(opts.category)) {
-    throw new Error(`category 必须是 schema 白名单之一，收到：${opts.category}`);
+  if (!c.categories.includes(opts.category)) {
+    throw new Error(`category 必须是 schema 白名单之一，收到：${opts.category}（可选：${c.categories.join(", ")}）`);
   }
   const dims = (Array.isArray(opts.dims) ? opts.dims : String(opts.dims).split(",")).map(Number);
   if (dims.length !== 3 || dims.some(isNaN)) throw new Error("dims 格式：宽,高,深（米）");
@@ -81,13 +143,25 @@ function packAsset(opts, outRoot) {
   if (isNaN(polycount) || polycount <= 0) throw new Error("polycount 必须为正整数");
   if (!fs.existsSync(opts.glb)) throw new Error(`找不到 glb 文件：${opts.glb}`);
 
-  if (polycount > BUDGET[opts.tier]) {
-    warnings.push(`面数 ${polycount} 超出 ${opts.tier} 预算 ${BUDGET[opts.tier]}，建议先减面`);
+  const budget = c.budgets[opts.tier];
+  if (polycount > budget) {
+    warnings.push(`面数 ${polycount} 超出 ${opts.tier} 预算 ${budget}，建议先减面`);
   }
 
   const shortName = opts.id.split(".")[2];
   const pkgDir = path.join(outRoot, shortName);
-  if (fs.existsSync(pkgDir)) fs.rmSync(pkgDir, { recursive: true, force: true });
+
+  // 防撞名：目录已被「不同 id」占用时直接报错，不再 rm -rf 静默覆盖
+  if (fs.existsSync(pkgDir)) {
+    const existingFile = path.join(pkgDir, "asset.json");
+    if (fs.existsSync(existingFile)) {
+      let existingId = null;
+      try { existingId = JSON.parse(fs.readFileSync(existingFile, "utf8")).id; } catch {}
+      if (existingId && existingId !== opts.id) {
+        throw new Error(`投递目录已被不同资产「${existingId}」占用：${pkgDir}。请更换 id 或先清理 inbox。`);
+      }
+    }
+  }
   fs.mkdirSync(pkgDir, { recursive: true });
   fs.copyFileSync(opts.glb, path.join(pkgDir, "model.glb"));
 
@@ -109,6 +183,13 @@ function packAsset(opts, outRoot) {
     license: "CC0-1.0",
     author: opts.author || "sdzdrccc",
   };
+
+  // schema 权威校验（复用 tbg-assets 的 lib/schema.js）
+  if (typeof c.validate === "function") {
+    const errs = c.validate(asset);
+    if (errs.length) throw new Error("asset.json 未通过 schema 校验：\n" + errs.join("\n"));
+  }
+
   fs.writeFileSync(path.join(pkgDir, "asset.json"), JSON.stringify(asset, null, 2) + "\n");
 
   const source = {
@@ -127,7 +208,7 @@ function packAsset(opts, outRoot) {
   return { pkgDir, warnings };
 }
 
-module.exports = { packAsset, CATEGORIES, TIERS, BUDGET };
+module.exports = { packAsset, CATEGORIES, TIERS, BUDGET, buildCtx };
 
 // ---- CLI ----
 if (require.main === module) {
@@ -141,6 +222,9 @@ if (require.main === module) {
     process.exit(1);
   }
   try {
+    const [kit] = String(args.id || "").split(".");
+    const ctx = buildCtx(config, kit);
+    ctx.notes.forEach((n) => console.log("[ctx] " + n));
     const { pkgDir, warnings } = packAsset(
       {
         glb: args.glb,
@@ -162,7 +246,8 @@ if (require.main === module) {
         author: args.author,
         refinement: args.refinement,
       },
-      outRoot
+      outRoot,
+      ctx
     );
     warnings.forEach((w) => console.warn("警告：" + w));
     console.log("资产包已投递：" + pkgDir);

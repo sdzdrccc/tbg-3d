@@ -27,7 +27,7 @@ description: Use when the user types /tbg-set to configure or update the TBG-3D 
 - `material-map.json` — 生成材质 → tbg-assets 共享材质映射表
 - `prompts/` — 各品类标准提示词模板
 - `generation-plan.md` — 分波次生成计划与积分预算
-- `scripts/pack.js` — 校验 + 打包资产包 + 投递 inbox（分类元数据在此写入）
+- `scripts/pack.js` — 打包资产包 + 投递 inbox。category/面数预算优先从 tbg-assets 的 schema 与 kit.json 派生；投递前复用 tbg-assets 的 `lib/schema.js` 过 schema 校验；同 id 覆盖、异 id 报错（不再 rm -rf）
 - `scripts/classify.js` — 文件名关键词分类（权威版；tbg-assets 网页侧仅有降级副本）
 - `scripts/gen-primitives.js` / `gen-materials.js` — 程序化 primitive 与共享材质生成
 - `scripts/fix-scale.js` — 修混元 FBX 转 GLB 的 100 倍单位缩水
