@@ -33,6 +33,7 @@ description: Use when the user types /tbg-3d to generate a 3D asset via Tripo (t
 - `scripts/fix-scale.js` — 修混元 FBX 转 GLB 的 100 倍单位缩水
 - `refine/refine.py` — Blender 端精修脚本（经 blender-mcp 执行）
 - `refine/render-preview.py` — Blender 无头精修+预览：缩放归一/轴心底部中心/减面 + 渲染 preview.png（`blender --background --python render-preview.py -- <config.json>`）
+- `refine/bake-lowpoly.py` — 高模→低模烘焙：remesh 熔成实体 + 智能展UV + 烘焙基色/法线，适合「离散小岛细瓦高模」得到低模+法线（MMO 友好）
 
 ---
 
@@ -134,6 +135,7 @@ node scripts/verify.js         # 检查环境是否就绪
 - **tier 按最终三角面选**：对照 `kits/<kit>/kit.json` 的 `budgets`（primitive 5000 / component 20000 / mass 50000 / hero 100000）取 ≤ 预算的最高档，避免误标。
 - 规范：单位（米）、轴心底部中心、面向 -Y（Blender 前向，导出后 = glTF -Z）——细则见 `pipeline/origin-rules.md`。
 - 无头路径：`render-preview.py`（`blender --background --python render-preview.py -- <config.json>`）——批量自动精修 + 预览 + 贴图 ≤1024。
+- 烘焙路径：`bake-lowpoly.py`（`blender --background --python bake-lowpoly.py -- <config.json>`）——源为**几千离散小岛的细瓦高模**时用：低模 remesh 熔成实体 + 烘焙基色/法线，得到**低面数 + 实心 + 瓦纹靠法线**（如 xieshan 屋顶 16000 面/component）。
 - 交互路径：`refine.py`（改 CONFIG 后经 blender-mcp execute_code 运行）——hero 件人工精修；材质槽按 `material-map.json` 映射（无映射打 `needs-material-review`）。
 
 ### 导入 Godot
