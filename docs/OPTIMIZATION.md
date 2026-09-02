@@ -58,7 +58,9 @@
 
 ## 三、待办 / 下一步
 
-- [ ] 资产包 LOD / preview.png 自动化（`gltf-transform` 减面 + 无头 Blender 渲染预览），当前 `roof-xuanshan-single-a` 40608 面超预算。
+- [x] 资产包 LOD / preview.png 自动化已完成：新增 `pipeline/refine/render-preview.py`（Blender 无头）。
+  - `roof-xuanshan-single-a` 已精修：40608 → 15000 面、缩放归一为 6m 宽、轴心底部中心、生成 preview.png。
+  - 全库 14 件资产均已生成 preview.png，`validate.js` 0 错误 0 警告。
 - [ ] tbg-3d 侧也接入 CI（至少 `node --check` 全部脚本）。
 - [ ] 新风格套件（`kits/tang` 等）化：材质参数表、分类映射收进每个 kit，脚本按 kit 读取。
 - [ ] `verify.js` 增强：检测 `assets_repo` 可写、`inbox` 存在。

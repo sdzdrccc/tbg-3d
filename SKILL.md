@@ -32,6 +32,7 @@ description: Use when the user types /tbg-set to configure or update the TBG-3D 
 - `scripts/gen-primitives.js` / `gen-materials.js` — 程序化 primitive 与共享材质生成
 - `scripts/fix-scale.js` — 修混元 FBX 转 GLB 的 100 倍单位缩水
 - `refine/refine.py` — Blender 端精修脚本（经 blender-mcp 执行）
+- `refine/render-preview.py` — Blender 无头精修+预览：缩放归一/轴心底部中心/减面 + 渲染 preview.png（`blender --background --python render-preview.py -- <config.json>`）
 
 ---
 
