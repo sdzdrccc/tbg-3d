@@ -223,8 +223,9 @@ def main():
         export_glb(out_glb, objs)
 
     total = sum(len(o.data.polygons) for o in objs)
+    tris = sum(sum(max(0, len(p.vertices) - 2) for p in o.data.polygons) for o in objs)
     out_label = out_glb if not render_only else "(render-only)"
-    print(f"REFINE_DONE faces={total} out_glb={out_label}")
+    print(f"REFINE_DONE polys={total} tris={tris} out_glb={out_label}")
 
     if cfg.get("preview"):
         render_preview(cfg["preview"], objs, int(cfg.get("preview_size", 300)))

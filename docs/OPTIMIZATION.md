@@ -112,3 +112,21 @@
   - 已投递 `tbg-assets/inbox/xieshan-single-a`（schema 校验通过，含 preview.png）。
 - **新增命令 `/tbg-hub`**（`cmd/tbg-hub/SKILL.md`）：一键启动仓储站网页预览/确认入库，与 `/tbg-set`、`/tbg-3d` 并列。
 
+
+---
+
+## 六、轮次 4（精修方案重定：保真优先 + 薄壳封底）
+
+### 1. 排查到的问题
+
+- **过度减面丢效果**：源 `xieshan-roof.glb` 为 49.8 万面高模，之前按 15000 / 41405 面 COLLAPSE 狠压，瓦片/戗脊/檐口细节被碾碎、发糊，用户反馈“损失太多模型效果”。
+- **镂空**：源模型是 **6363 个互不相连的瓦片小岛**组成的开放壳（168340 开放边，无底面）；减面后瓦片间出现空隙，产生镂空观感。
+- **面数口径不一致**：`render-preview.py` 打印 Blender 面数（polygons），但 GLB 导出三角化后 `polycount` 用三角面数，两者不一致导致 tier 误判/超预算。
+
+### 2. 已实施的优化（重定方案）
+
+- **保真优先**：不再盲压面数——**目标面数 = 该 tier 预算**；`render-preview.py` 现在同时打印 `REFINE_DONE polys=… tris=…`，`polycount` 取 **GLB 三角面数**。
+- **薄壳封底防镂空**：开放壳/单面源先设 `solidify_m`（0.05m）加厚再减面，得到封闭实体（`boundary=0`/各小岛水密）。
+- **tier 按最终三角面自动定**：对照 `kit.json` budgets（primitive 5000 / component 20000 / mass 50000 / hero 100000）取 ≤ 预算的最高档。
+- **结果**：`xieshan-single-a` 重精修为 **Solidify 0.05m + ~93058 三角面**、6.0m 宽、tier=**hero**（≤100000）；瓦片清晰、封底实心，预览见图。已重新打包投递 inbox。
+

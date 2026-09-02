@@ -128,11 +128,13 @@ node scripts/verify.js         # 检查环境是否就绪
 - 预设 `--for game-pc|game-mobile|anim|print`；P1 参数 `face_limit`（简单≥150、复杂≥250）、`texture`/`pbr`/`export_uv`。
 - **模型 URL 5 分钟过期 → 任务成功立即下载**。
 
-### Blender 精修
-- 标准路径：`pipeline/refine/refine.py`（改 CONFIG 后经 blender-mcp execute_code 运行）。
+### Blender 精修（保真优先，2026-09 重定）
+- **不追求过度压面**：目标面数 = 该 tier 预算，`polycount` 取 **GLB 三角面数**（`REFINE_DONE tris=`）。
+- **薄壳先封底**：源是开放壳 / 单面（瓦片壳、薄屋顶等）时设 `solidify_m`（如 0.05m）加厚再减面，避免镂空（`boundary=0`）。
+- **tier 按最终三角面选**：对照 `kits/<kit>/kit.json` 的 `budgets`（primitive 5000 / component 20000 / mass 50000 / hero 100000）取 ≤ 预算的最高档，避免误标。
 - 规范：单位（米）、轴心底部中心、面向 -Y（Blender 前向，导出后 = glTF -Z）——细则见 `pipeline/origin-rules.md`。
-- 材质：材质槽按 `pipeline/material-map.json` 重命名为共享材质 ref；无映射打 `needs-material-review`。
-- hero 件人工精修：缩放/旋转/位移、减面（decimate）、补洞/合并（bmesh）、拆件。
+- 无头路径：`render-preview.py`（`blender --background --python render-preview.py -- <config.json>`）——批量自动精修 + 预览 + 贴图 ≤1024。
+- 交互路径：`refine.py`（改 CONFIG 后经 blender-mcp execute_code 运行）——hero 件人工精修；材质槽按 `material-map.json` 映射（无映射打 `needs-material-review`）。
 
 ### 导入 Godot
 - 用 godot-mcp 文件/编辑器工具把 `model.glb` 实例化进目标场景，加碰撞（Box/Capsule/Convex），保存 `.tscn`。
