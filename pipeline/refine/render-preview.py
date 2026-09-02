@@ -12,6 +12,7 @@ config.json 字段：
     "preview":      "preview.png 输出路径",
     "target_width_m": 6.0,     // 缩放使其水平最大边长（米），0 = 保持原尺寸
     "target_faces":   15000,   // 减面到 <= 该面数，0 = 不减面
+    "solidify_m":     0.06,    // 给薄壳加厚（米），0 = 不加；镂空/薄屋顶建议 >0
     "preview_size":   300,     // 预览图边长（像素）
     "forward":        "-Y",    // 规范朝向；模型若朝向不对，绕 Z 旋转
     "camera_angle":   [1.0, -1.4, 1.0]  // 相机方位（未归一，相对模型中心）
@@ -112,6 +113,22 @@ def decimate(objs, target_faces):
         bpy.ops.object.modifier_apply(modifier=mod.name)
 
 
+def solidify(objs, thickness):
+    """给薄壳网格加厚度（封底面），避免薄屋顶/瓦面从某些角度镂空。"""
+    if not thickness or thickness <= 0:
+        return
+    for o in objs:
+        m = o.modifiers.new("sol", "SOLIDIFY")
+        m.thickness = thickness
+        m.offset = -1.0   # 沿法线向内长厚，保留外表面
+        m.use_rim = True
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    print(f"SOLIDIFY thickness={thickness}")
+
+
 def downscale_textures(max_texture):
     """把内嵌贴图缩放到最大边 <= max_texture（游戏资产贴图 ≤1024）。"""
     if not max_texture or max_texture <= 0:
@@ -193,6 +210,7 @@ def main():
         apply_transforms(o)
 
     normalize_scale_and_origin(objs, cfg.get("target_width_m", 0))
+    solidify(objs, cfg.get("solidify_m", 0))
     decimate(objs, cfg.get("target_faces", 0))
     downscale_textures(cfg.get("max_texture", 1024))
 

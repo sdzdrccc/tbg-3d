@@ -103,9 +103,12 @@
 
 - **`render-preview.py` 新增 `downscale_textures(max_texture)`**：把内嵌贴图缩放到最大边 ≤ `max_texture`（默认 1024），导出前调用（不足 1024 的自动跳过）。
 - **`pack.js` 支持 `--preview <preview.png>`**：把预览图一并放入资产包（可选；供 `validate.js` 校验）。
+- **问题：初次精修镂空**：源模型 `xieshan-roof.glb` 本身是**开放薄壳**（仅瓦片外表面，168340 开放边、无底面）；按 15000 面 COLLAPSE 减面后更碎，导出 mesh **开放边 22222 / 面 15000**，从下方/檐口看直接镂空。
+  - **修复**：`render-preview.py` 新增 `solidify(objs, thickness)`（配置 `solidify_m`）——减面前先给薄壳加厚封底（0.06m），再减面，得到**封闭实体（boundary=0）**。同时保留 `downscale_textures`。
 - **处理外部模型** `xieshan-roof.glb` → 精修 `cn-ancient.roof.xieshan-single-a`（歇山顶·单檐 A）：
-  - 498156 → **15000 面**、缩放归一为 **6.0m 宽**、轴心底部中心；
-  - 贴图已校验 ≤1024（源已是 1024）、生成 300×300 `preview.png`；
+  - 498156 → **~41405 三角面**（Solidify 0.06m 封底）、缩放归一为 **6.0m 宽**、轴心底部中心；
+  - tier 由 `component`（≤20000）改为 **`mass`**（41405 面 >20000，符合 mass 预算 50000）；
+  - 贴图已校验 ≤1024、生成 300×300 `preview.png`；
   - 已投递 `tbg-assets/inbox/xieshan-single-a`（schema 校验通过，含 preview.png）。
 - **新增命令 `/tbg-hub`**（`cmd/tbg-hub/SKILL.md`）：一键启动仓储站网页预览/确认入库，与 `/tbg-set`、`/tbg-3d` 并列。
 
