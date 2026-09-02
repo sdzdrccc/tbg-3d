@@ -107,4 +107,5 @@
   - 498156 → **15000 面**、缩放归一为 **6.0m 宽**、轴心底部中心；
   - 贴图已校验 ≤1024（源已是 1024）、生成 300×300 `preview.png`；
   - 已投递 `tbg-assets/inbox/xieshan-single-a`（schema 校验通过，含 preview.png）。
+- **新增命令 `/tbg-hub`**（`cmd/tbg-hub/SKILL.md`）：一键启动仓储站网页预览/确认入库，与 `/tbg-set`、`/tbg-3d` 并列。
 

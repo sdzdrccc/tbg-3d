@@ -41,6 +41,9 @@ description: Use when the user types /tbg-3d to generate a 3D asset via Tripo (t
 ### `/tbg-set`
 配置 / 更新环境。运行 `node scripts/install.js`（交互选文件夹 → 装 tripo → 配 MCP → 自动启动 Blender/Godot）。用户随时可输入 `/tbg-set` 重新配置。
 
+### /tbg-hub
+启动 tbg-assets 仓储站网页（node tools/hub/server.js），预览并确认 pack.js 投递到 inbox/ 的资产包。用户输入 /tbg-hub 后启动服务并打开 http://localhost:8788。
+
 ### `/tbg-3d`
 生成 3D 模型入口。用户输入 `/tbg-3d` 后，展示四个选项：
 1. **文本生成 3D**（默认，Tripo）
