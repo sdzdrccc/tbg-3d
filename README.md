@@ -120,6 +120,52 @@ AI 会按 `tripo-asset-pipeline` 走：
 
 ---
 
+## 项目结构
+
+```text
+tbg-3d/
+├── SKILL.md                          # 主技能：/tbg-3d 资产管线全流程（生成→分类→精修→压缩→打包→投递 inbox）
+├── config.json                       # 本机环境配置：Blender/Godot 路径、Godot 项目、assets_repo（install.js 写入；已 gitignore 不入库）
+├── LICENSE                           # MIT；脚本不含任何 API Key（Tripo 凭证存本地 ~/.tripo）
+├── .gitignore                        # 忽略 config.json / .tripo 凭证 / tripo-out / tmp 等本地产物
+│
+├── cmd/                              # 子命令技能
+│   ├── tbg-set/SKILL.md              # /tbg-set：环境安装与配置入口（引导 install.js + verify.js）
+│   └── tbg-hub/SKILL.md              # /tbg-hub：启动 tbg-assets 仓储站网页（:8788）预览并确认入库
+│
+├── scripts/                          # 环境安装（首次使用）
+│   ├── install.js                    # 交互式安装器：选 Blender/Godot 文件夹 → 装 tripo-cli → 写 MCP 配置 → 自动启动
+│   └── verify.js                     # 环境自检：Node / Blender / Godot / Tripo 登录 / MCP 配置逐项检查
+│
+├── pipeline/                         # ★ 生产管线（日常资产生产核心）
+│   ├── prompts/
+│   │   └── cn-ancient.md             # 中式古风提示词模板：全局风格锚 + 构件/整栋/英雄件三类模板 + 尺寸速查
+│   ├── generation-plan.md            # 分波次生成计划与积分预算（Wave 0–3 合计约 2460 积分；Wave 0 已完成）
+│   ├── building-assets.md            # 修仙小镇建筑资产需求清单：每栋楼的构件 BOM、资产状态、优先级、生成顺序
+│   ├── origin-rules.md               # 轴心与朝向规范（1u=1m、底部中心、-Z 朝前）：精修脚本强制执行的标准
+│   ├── material-map.json             # 生成材质 → 共享材质映射表：byCategory 默认映射 + byKeyword 材质槽识别
+│   ├── refine/                       # Blender 精修脚本（按源模型选路径）
+│   │   ├── refine.py                 # 交互精修：导入→单位归一→法线→轴心→材质槽重命名→导出 GLB（blender-mcp 执行）
+│   │   ├── render-preview.py         # 无头精修+预览：缩放归一/减面/薄壳加厚 + 渲染 preview.png（blender --background）
+│   │   └── bake-lowpoly.py           # 高模→低模烘焙：remesh 熔实体 + 智能展 UV + 烘焙基色/法线（离散小岛细瓦高模专用）
+│   └── scripts/                      # 生产端 Node 脚本
+│       ├── pack.js                   # 打包资产包（model.glb + asset.json + source.json）投递 tbg-assets/inbox；过 schema 校验才发
+│       ├── classify.js               # 文件名关键词分类器（权威版；tbg-assets 网页侧仅持降级副本）
+│       ├── gen-primitives.js         # 程序化生成 primitive 构件（台基/台阶/墙/柱/地砖，0 积分，gltf-transform 建模）
+│       ├── gen-materials.js          # 从参数表生成共享材质库（18 种 .tres + index.json，直写 tbg-assets 仓库）
+│       └── fix-scale.js              # 修混元3D FBX 转 GLB 的 100 倍单位缩水（缩放顶点与节点，重算包围盒）
+│
+├── docs/                             # 设计决策文档
+│   ├── 17-skill-asset-pipeline.md    # 资产管线完整设计方案（三工位流程）
+│   ├── 18-godot-mcp-port-decision.md # Godot-MCP 端口三方案（A/B/C）对比与回退决策
+│   └── OPTIMIZATION.md               # 生产端优化记录（Windows 兼容修复、schema 单一真源等）
+│
+└── .github/
+    └── workflows/ci.yml              # CI：push/PR 触发 scripts/ 与 pipeline/scripts/ 全部 JS 语法检查
+```
+
+---
+
 ## 模型与生成模式（速查）
 
 | 模式 | 示例 |
