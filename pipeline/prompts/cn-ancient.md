@@ -2,8 +2,9 @@
 
 > 用法：复制对应分类模板，只替换 `【主体】` 和尺寸描述，其余一字不动——保证全库风格统一。
 > 所有命令必须带 `--for game-mobile -n 2`，输出到工作区 `_raw/`（入库前先精修，见 AGENTS.md）。
-> **低模 MMO 用 `--for game-mobile`**（= P1-20260311 低模，默认 `face_limit 15000`、standard 贴图）。⚠️ `--for game-pc` 其实是 **v3.1 高精度 + detailed 贴图**，不是低模，别用来做 MMO 资产。
+> **低模 MMO 用 `--for game-mobile`**（= P1-20260311 低模，默认 `face_limit 15000`、standard 贴图）。⚠️ `--for game-pc` 是 **v3.1 高精度 + detailed**（更费积分），**只用于唯一地标 hero**；可实例化的组件/民居/整栋别用它。
 > 想更小面数 / 真实米制尺寸 / 更小体积，追加 `-p face_limit=… -p auto_size=true -p compress=geometry`。
+> **两类：** 组件/民居/整栋（可实例化）→ `game-mobile`（P1 低模）；**唯一地标 hero** → `game-pc`（v3.1 高清+detailed，更费积分，配 LOD）。若 hero 想更省，用 `game-mobile` 出低模再烘焙。
 
 ## 全局风格锚（拼进每条提示词）
 
@@ -82,7 +83,7 @@ tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青�
 
 ## 二、整栋建筑模板（mass，标准贴图，40 积分）
 
-整栋用于远景铺量，**带贴图一次到位**：
+整栋用于远景铺量 / 可实例化（客栈、民居、铺面），**带贴图一次到位**，用 `game-mobile`（P1 低模 + face_limit 15000）：
 
 ```bash
 tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古代建筑风格，完整单体建筑，游戏低模带贴图，不要人物不要现代元素" --for game-mobile -n 2 -o _raw/buildings
@@ -93,15 +94,15 @@ tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古
 两层中式客栈，悬山顶青瓦，一层排门店铺二层木栏杆走廊，白墙朱柱，檐下挂红灯笼，完整单体建筑
 ```
 
-## 三、英雄件模板（hero，图生高清，50-60 积分）
+## 三、英雄件模板（hero，唯一地标 → game-pc / v3.1 高清，50-60 积分）
 
-英雄件（全场景 ≤ 5 个）必须先出概念图再图生：
+英雄件 = 全场景独一无二的地标（主城牌楼、仙宫大殿），**用 `game-pc`**（v3.1 高精度 + detailed），并配 LOD；先出概念图再图生：
 
 ```bash
 # 1. 先用图像工具产出概念图，存 concept/
 #    概念图要求：正立面 3/4 视角、纯白背景、无文字
-# 2. 图生 3D：
-tripo make ./concept/bld-dian-hall-hero.png --for game-mobile -n 2 -o _raw/hero
+# 2. 图生 3D（game-pc = v3.1 高清；⚠️ 更费积分，配 LOD）：
+tripo make ./concept/bld-dian-hall-hero.png --for game-pc -n 2 -o _raw/hero
 # 3. 记录 seed 与 task id 到该资产 source.json
 ```
 

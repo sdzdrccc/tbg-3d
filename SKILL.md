@@ -124,7 +124,7 @@ node scripts/verify.js         # 检查环境是否就绪
 **tier 分流**：
 - `primitive`（程序化几何）：`gen-primitives.js` 直接打包，免精修免减面
 - `component` / `mass`（AI 构件）：走完整管线，refine.py 脚本精修
-- `hero`（核心件）：人工 Blender 精修替代脚本，其余相同
+- `hero`（核心件）：人工 Blender 精修替代脚本，其余相同；生成用 `--for game-pc`（v3.1 高精度 + detailed，配 LOD）或 game-mobile 出高模后烘焙
 
 ### 生成（Tripo）
 - 三种模式：文本 `tripo make "中式门楼"`；图片 `tripo make concept.png`；多视图 `tripo make front.png left.png back.png right.png`（最精确）。
