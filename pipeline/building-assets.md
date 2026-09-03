@@ -77,15 +77,18 @@
 
 一层临街店面，歇山顶（店铺级形制）。玩家最先光顾的功能商铺，识别度三件套：无字布幌（贴"灵草"）、门口药摊、檐角大葫芦。
 
-拼装公式：
+拼装公式（即 `prompts/cn-ancient.md` 配方 F，模数核对已过）：
 
 ```
 台基   stone-flat-a（高0.5m）+ stairs-front-3
-柱列   pillar-round-a × 4（檐柱，间距 2m）
-立面   wall-door-shop-a × 3（正面临街）+ wall-lattice-a × 2（两侧山墙）
-屋顶   roof-xieshan-single-a
+柱列   pillar-round-a × 8（前檐4 + 后檐4，h3m）
+立面   wall-door-shop-a × 3（正面）+ wall-solid-a × 3（背面）
+       + 两山各 wall-lattice-a ×1（前跨）+ wall-solid-a ×1（后跨）
+屋顶   roof-xieshan-single-a（歇山 6×4m，已入库）
 地面   ground-slab-a（店内）
 ```
+
+参考概念图：`concept/lingcao-shop-front.jpg`；正面若想贴近图中端部花窗观感，可用配方 F 的变体（明间排门 + 梢间花窗墙）。
 
 | 层 | 资产 | 状态 | 优先级 | 积分 |
 |---|---|---|---|---|
