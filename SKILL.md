@@ -128,7 +128,7 @@ node scripts/verify.js         # 检查环境是否就绪
 
 ### 生成（Tripo）
 - 三种模式：文本 `tripo make "中式门楼"`；图片 `tripo make concept.png`；多视图 `tripo make front.png left.png back.png right.png`（最精确）。
-- 预设 `--for game-pc|game-mobile|anim|print`；P1 参数 `face_limit`（简单≥150、复杂≥250）、`texture`/`pbr`/`export_uv`。
+- 预设：`--for game-mobile`=**P1 低模**（face_limit 15000、standard 贴图，MMO 用这个）；`--for game-pc`=**v3.1 高精度 + detailed 贴图**（非低模）；`anim`/`print` 另用。P1 参数 `face_limit`（简单≥150、复杂≥250）、`texture`/`pbr`/`export_uv`；另可 `-p auto_size=true -p compress=geometry`。
 - **模型 URL 5 分钟过期 → 任务成功立即下载**。
 
 ### Blender 精修（保真优先，2026-09 重定）

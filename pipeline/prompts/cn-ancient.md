@@ -1,7 +1,9 @@
 # cn-ancient 套件提示词模板
 
 > 用法：复制对应分类模板，只替换 `【主体】` 和尺寸描述，其余一字不动——保证全库风格统一。
-> 所有命令必须带 `--for game-pc -n 2`，输出到工作区 `_raw/`（入库前先精修，见 AGENTS.md）。
+> 所有命令必须带 `--for game-mobile -n 2`，输出到工作区 `_raw/`（入库前先精修，见 AGENTS.md）。
+> **低模 MMO 用 `--for game-mobile`**（= P1-20260311 低模，默认 `face_limit 15000`、standard 贴图）。⚠️ `--for game-pc` 其实是 **v3.1 高精度 + detailed 贴图**，不是低模，别用来做 MMO 资产。
+> 想更小面数 / 真实米制尺寸 / 更小体积，追加 `-p face_limit=… -p auto_size=true -p compress=geometry`。
 
 ## 全局风格锚（拼进每条提示词）
 
@@ -20,7 +22,7 @@
 当你有同一物体的正/左/背/右参考图时用多视图，比纯文本/单图更准。命令：
 
 ```bash
-tripo make front.png left.png back.png right.png --for game-pc -n 2 -o _raw/components
+tripo make front.png left.png back.png right.png --for game-mobile -n 2 -o _raw/components
 ```
 
 - **传 2–4 张**，必须含**正面**，其余可省但至少 2 张；缺的**直接不传**（CLI 不认空串）。
@@ -33,7 +35,7 @@ tripo make front.png left.png back.png right.png --for game-pc -n 2 -o _raw/comp
 
 **参数**：`-p <key=value>` 可反复传：
 ```bash
-tripo make front.png right.png --for game-pc -n 2 -o _raw/components -p face_limit=300 -p texture_quality=standard -p model_seed=42
+tripo make front.png right.png --for game-mobile -n 2 -o _raw/components -p face_limit=12000 -p auto_size=true -p compress=geometry -p model_seed=42
 ```
 
 ## 一、构件模板（component，无贴图，30 积分）
@@ -41,7 +43,7 @@ tripo make front.png right.png --for game-pc -n 2 -o _raw/components -p face_lim
 构件用于拼装，必须**单体、正交比例、无贴图**，材质入库后在 Blender/Godot 挂共享材质。
 
 ```bash
-tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青瓦木构，造型简洁规整，游戏低模，单体孤立物件，无底座无地面，不要人物不要背景" --for game-pc -n 2 -o _raw/components
+tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青瓦木构，造型简洁规整，游戏低模，单体孤立物件，无底座无地面，不要人物不要背景" --for game-mobile -n 2 -o _raw/components
 ```
 
 分类细化：
@@ -83,7 +85,7 @@ tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青�
 整栋用于远景铺量，**带贴图一次到位**：
 
 ```bash
-tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古代建筑风格，完整单体建筑，游戏低模带贴图，不要人物不要现代元素" --for game-pc -n 2 -o _raw/buildings
+tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古代建筑风格，完整单体建筑，游戏低模带贴图，不要人物不要现代元素" --for game-mobile -n 2 -o _raw/buildings
 ```
 
 示例（客栈）：
@@ -99,7 +101,7 @@ tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古
 # 1. 先用图像工具产出概念图，存 concept/
 #    概念图要求：正立面 3/4 视角、纯白背景、无文字
 # 2. 图生 3D：
-tripo make ./concept/bld-dian-hall-hero.png --for game-pc -n 2 -o _raw/hero
+tripo make ./concept/bld-dian-hall-hero.png --for game-mobile -n 2 -o _raw/hero
 # 3. 记录 seed 与 task id 到该资产 source.json
 ```
 
