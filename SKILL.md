@@ -127,8 +127,8 @@ node scripts/verify.js         # 检查环境是否就绪
 - `hero`（核心件）：人工 Blender 精修替代脚本，其余相同；生成用 `--for game-pc`（v3.1 高精度 + detailed，配 LOD）或 game-mobile 出高模后烘焙
 
 ### 生成（Tripo）
-- 三种模式：文本 `tripo make "中式门楼"`；图片 `tripo make concept.png`；多视图 `tripo make front.png left.png back.png right.png`（最精确）。
-- 预设：`--for game-mobile`=**P1 低模**（face_limit 15000、standard 贴图，MMO 用这个）；`--for game-pc`=**v3.1 高精度 + detailed 贴图**（非低模）；`anim`/`print` 另用。P1 参数 `face_limit`（简单≥150、复杂≥250）、`texture`/`pbr`/`export_uv`；另可 `-p auto_size=true -p compress=geometry`。
+- 三种模式（**直接出 GLB**，别用 `--for`，它会触发 convert:FBX 多扣积分）：文本 `tripo make "中式门楼" --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true`；图片 `tripo make concept.png --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true`；多视图 `tripo make front.png left.png back.png right.png --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true`（最精确）。
+- 预设：`--for game-mobile`=**P1 低模**（face_limit 15000、standard）；`--for game-pc`=**v3.1 高精度 + detailed**（非低模）；`anim`/`print` 另用。⚠️ **`--for game-mobile/game-pc` 会触发 `convert:FBX`**（+10 积分，只出 FBX）；**要 GLB 直接 `--model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true`**（hero 用 `--model tripo-v3.1`）。P1 参数 `face_limit`（简单≥150、复杂≥250）；另可 `-p auto_size=true -p compress=geometry`。
 - **模型 URL 5 分钟过期 → 任务成功立即下载**。
 
 ### Blender 精修（保真优先，2026-09 重定）
@@ -152,7 +152,7 @@ node scripts/verify.js         # 检查环境是否就绪
 |---|---|
 | 文本转 3D | `tripo make "中式门楼"` |
 | 图片转 3D | `tripo make concept.png` |
-| 多视图转 3D | `tripo make front.png left.png back.png right.png` |
+| 多视图转 3D | `tripo make front.png left.png back.png right.png --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true` |
 
 **选择**：游戏/移动端低模 → `tripo-p1`（48–20k 面，拓扑干净）；精细展示 → `tripo-v3.1`。
 P1 成本：文本→3D 无贴图 30 / 标准 40 / 高清 50（图片、多视图 40/50/60）。

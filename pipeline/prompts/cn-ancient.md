@@ -1,8 +1,8 @@
 # cn-ancient 套件提示词模板
 
 > 用法：复制对应分类模板，只替换 `【主体】` 和尺寸描述，其余一字不动——保证全库风格统一。
-> 所有命令必须带 `--for game-mobile -n 2`，输出到工作区 `_raw/`（入库前先精修，见 AGENTS.md）。
-> **低模 MMO 用 `--for game-mobile`**（= P1-20260311 低模，默认 `face_limit 15000`、standard 贴图）。⚠️ `--for game-pc` 是 **v3.1 高精度 + detailed**（更费积分），**只用于唯一地标 hero**；可实例化的组件/民居/整栋别用它。
+> 所有命令**直接出 GLB**：`--model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true`（构件/民居/整栋）。**别用 `--for game-mobile/game-pc`**——它们会触发 `convert:FBX`，多扣 10 积分且只给 FBX。输出到工作区 `_raw/`（入库前先精修，见 AGENTS.md）。
+> **低模：** `--model tripo-p1`（= P1-20260311，face_limit 50–20000）+ `-p texture=true -p pbr=true`（直接出 GLB）。**唯一地标 hero** 用 `--model tripo-v3.1`（高精度 + detailed，更费积分，配 LOD）。
 > 想更小面数 / 真实米制尺寸 / 更小体积，追加 `-p face_limit=… -p auto_size=true -p compress=geometry`。
 > **两类：** 组件/民居/整栋（可实例化）→ `game-mobile`（P1 低模）；**唯一地标 hero** → `game-pc`（v3.1 高清+detailed，更费积分，配 LOD）。若 hero 想更省，用 `game-mobile` 出低模再烘焙。
 
@@ -23,7 +23,7 @@
 当你有同一物体的正/左/背/右参考图时用多视图，比纯文本/单图更准。命令：
 
 ```bash
-tripo make front.png left.png back.png right.png --for game-mobile -n 2 -o _raw/components
+tripo make front.png left.png back.png right.png --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true -n 2 -o _raw/components
 ```
 
 - **传 2–4 张**，必须含**正面**，其余可省但至少 2 张；缺的**直接不传**（CLI 不认空串）。
@@ -36,7 +36,7 @@ tripo make front.png left.png back.png right.png --for game-mobile -n 2 -o _raw/
 
 **参数**：`-p <key=value>` 可反复传：
 ```bash
-tripo make front.png right.png --for game-mobile -n 2 -o _raw/components -p face_limit=12000 -p auto_size=true -p compress=geometry -p model_seed=42
+tripo make front.png right.png --model tripo-p1 -p face_limit=12000 -p auto_size=true -p compress=geometry -p model_seed=42 -n 2 -o _raw/components
 ```
 
 ## 一、构件模板（component，无贴图，30 积分）
@@ -44,7 +44,7 @@ tripo make front.png right.png --for game-mobile -n 2 -o _raw/components -p face
 构件用于拼装，必须**单体、正交比例、无贴图**，材质入库后在 Blender/Godot 挂共享材质。
 
 ```bash
-tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青瓦木构，造型简洁规整，游戏低模，单体孤立物件，无底座无地面，不要人物不要背景" --for game-mobile -n 2 -o _raw/components
+tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青瓦木构，造型简洁规整，游戏低模，单体孤立物件，无底座无地面，不要人物不要背景" --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true -n 2 -o _raw/components
 ```
 
 分类细化：
@@ -86,7 +86,7 @@ tripo make "【主体，含尺寸与形制】，中国古代建筑风格，青�
 整栋用于远景铺量 / 可实例化（客栈、民居、铺面），**带贴图一次到位**，用 `game-mobile`（P1 低模 + face_limit 15000）：
 
 ```bash
-tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古代建筑风格，完整单体建筑，游戏低模带贴图，不要人物不要现代元素" --for game-mobile -n 2 -o _raw/buildings
+tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古代建筑风格，完整单体建筑，游戏低模带贴图，不要人物不要现代元素" --model tripo-p1 -p face_limit=15000 -p texture=true -p pbr=true -n 2 -o _raw/buildings
 ```
 
 示例（客栈）：
@@ -102,7 +102,7 @@ tripo make "【建筑描述，含层数/屋顶形制/材质色彩】，中国古
 # 1. 先用图像工具产出概念图，存 concept/
 #    概念图要求：正立面 3/4 视角、纯白背景、无文字
 # 2. 图生 3D（game-pc = v3.1 高清；⚠️ 更费积分，配 LOD）：
-tripo make ./concept/bld-dian-hall-hero.png --for game-pc -n 2 -o _raw/hero
+tripo make ./concept/bld-dian-hall-hero.png --model tripo-v3.1 -p texture_quality=detailed -p texture=true -p pbr=true -n 2 -o _raw/hero
 # 3. 记录 seed 与 task id 到该资产 source.json
 ```
 
