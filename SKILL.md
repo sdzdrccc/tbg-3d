@@ -66,13 +66,15 @@ description: Use when the user types /tbg-3d to generate a 3D asset via Tripo (t
 - 主体**清晰、背景干净、遮挡少**；格式 PNG / JPEG / WebP。
 - **最大 20 MB**，推荐 **≥256×256px**。
 - 可选 `enable_image_autofix` 自动优化低质量图。
-- 多视图：`tripo make <前> <后> <左> <右>`（最精确）
+- 多视图：`tripo make <图1> <图2> [<图3> [<图4>]]`（最精确，2–4 张）
 
-**多视图输入要求（官方）**：
-- 视角顺序：**正面、左侧、背面、右侧**（front / left / back / right）。服务端规范 [正、左、背、右]。
-- **正面不可省略**，其余视角可省，但**至少 2 张**。
+**多视图输入要求（CLI 0.3.1，官方 multiview-to-model）**：
+- **2–4 张图**；必须有一张**正面**。
+- 视图识别二选一：
+  1. **文件名提示（推荐）**：文件名含 `front/正面/前`、`back/背面/后`、`left/左`、`right/右` → 自动对应 正/背/左/右（顺序无关）。
+  2. **位置顺序**：不靠文件名时按 **[正面, 左侧, 背面, 右侧]**（front, left, back, right）补位——**第一张必须是正面**。
+- 缺的视角**直接不传**（不要用空串占位；传空串是 REST 裸 API 的 legacy 写法，CLI 不用）。
 - 同一物体、**一致光照**；格式 PNG / JPEG / WebP；推荐 **≥256×256px**。
-- 缺的视角传空（`""`）；图片可用本地路径 / 上传后的 URL / file_token。
 
 之后进入「生成 → 分类 → Blender 精修 → 压缩 → 打包投递」流程（逐步确认）。
 
@@ -125,7 +127,7 @@ node scripts/verify.js         # 检查环境是否就绪
 - `hero`（核心件）：人工 Blender 精修替代脚本，其余相同
 
 ### 生成（Tripo）
-- 三种模式：文本 `tripo make "中式门楼"`；图片 `tripo make concept.png`；多视图 `tripo make front.png back.png left.png`（最精确）。
+- 三种模式：文本 `tripo make "中式门楼"`；图片 `tripo make concept.png`；多视图 `tripo make front.png left.png back.png right.png`（最精确）。
 - 预设 `--for game-pc|game-mobile|anim|print`；P1 参数 `face_limit`（简单≥150、复杂≥250）、`texture`/`pbr`/`export_uv`。
 - **模型 URL 5 分钟过期 → 任务成功立即下载**。
 
@@ -150,7 +152,7 @@ node scripts/verify.js         # 检查环境是否就绪
 |---|---|
 | 文本转 3D | `tripo make "中式门楼"` |
 | 图片转 3D | `tripo make concept.png` |
-| 多视图转 3D | `tripo make front.png back.png left.png` |
+| 多视图转 3D | `tripo make front.png left.png back.png right.png` |
 
 **选择**：游戏/移动端低模 → `tripo-p1`（48–20k 面，拓扑干净）；精细展示 → `tripo-v3.1`。
 P1 成本：文本→3D 无贴图 30 / 标准 40 / 高清 50（图片、多视图 40/50/60）。
