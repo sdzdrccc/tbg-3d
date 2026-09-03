@@ -15,6 +15,27 @@
 不要现代元素，不要人物，不要文字招牌，不要背景环境，单体孤立物件
 ```
 
+## 多视图生成（有参考图时，最精确）
+
+当你有同一物体的正/左/背/右参考图时用多视图，比纯文本/单图更准。命令：
+
+```bash
+tripo make front.png left.png back.png right.png --for game-pc -n 2 -o _raw/components
+```
+
+- **传 2–4 张**，必须含**正面**，其余可省但至少 2 张；缺的**直接不传**（CLI 不认空串）。
+- 视图识别：文件名含 `front/back/left/right` 或 `前/后/左/右` 自动对应；否则按 **[正,左,背,右]** 位置补位（第一张必须是正面）。
+- 图片：同一物体、一致光照；`PNG/JPEG/WebP`；≥256×256px。
+
+**模型（P 系列）**：
+- 低模：`--model tripo-p1`（= `P1-20260311`，面数 50–20000）。
+- P2（四边面，preview）：CLI 0.3.1 暂无 `tripo-p2` 别名，可用 `--model P2-20260801`（服务端接受时），或 `--param quad=true`（仅 P2 生效）。
+
+**参数**：`-p <key=value>` 可反复传：
+```bash
+tripo make front.png right.png --for game-pc -n 2 -o _raw/components -p face_limit=300 -p texture_quality=standard -p model_seed=42
+```
+
 ## 一、构件模板（component，无贴图，30 积分）
 
 构件用于拼装，必须**单体、正交比例、无贴图**，材质入库后在 Blender/Godot 挂共享材质。
