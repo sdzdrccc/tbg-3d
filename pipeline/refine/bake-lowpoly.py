@@ -193,7 +193,10 @@ def render_preview(out_path, objs, size):
     sun.rotation_euler = (0.9, 0.2, 0.6)
     sun_data.energy = 4.5
 
-    scene.render.engine = "BLENDER_EEVEE_NEXT" if bpy.app.version >= (4, 2) else "BLENDER_EEVEE"
+    try:
+        scene.render.engine = "BLENDER_EEVEE_NEXT"
+    except TypeError:
+        scene.render.engine = "BLENDER_EEVEE"
     scene.render.resolution_x = size
     scene.render.resolution_y = size
     scene.render.resolution_percentage = 100
